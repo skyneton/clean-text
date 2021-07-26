@@ -44,11 +44,12 @@ function TextCleaner(str) {
     for (let i = 0; i < str.length; i++) {
         const c = str.charAt(i);
         const nextC = str.charAt(i + 1);
+        const lastC = convertData[convertData.length - 1] || "";
         quoteOrTextOpenCheck(c);
         if (c == " " && nextC == "\n")
             continue;
         if ((textOpen > 0 || quoteStack.length > 0) && c == "\n") {
-            if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC))
+            if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC) && lastC != " ")
                 convertData.push(" ");
             continue;
         }
@@ -59,13 +60,12 @@ function TextCleaner(str) {
             convertData.push(c);
             if (!(textOpen > 0 || quoteStack.length > 0) && isSpecialEndChar(c) && c != "\n")
                 convertData.push("\n");
-            else
+            else if (c != " " && nextC != " ")
                 convertData.push(" ");
             continue;
         }
-        const lastC = convertData[convertData.length - 1];
-        if (typeof lastC === "string" && lastC != "" && isNotEndChar(lastC) && (c == " " && nextC == "\n" || c == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
-            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "도"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
+        if (lastC != "" && isNotEndChar(lastC) && (c == " " && nextC == "\n" || c == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
+            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
                 convertData.push(" ");
             while (["\n", " "].includes(str.charAt(++i)))
                 ;
