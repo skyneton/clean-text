@@ -32,7 +32,7 @@ function TextCleaner(str: string) {
     }
 
     const isSpecialChar = (c: string) => {
-        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|"].includes(c);
+        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|", "+", "=", "-", "_"].includes(c) || isQuoteChar(c);
     };
 
     const isSpecialEndChar = (c: string) => {
@@ -77,7 +77,7 @@ function TextCleaner(str: string) {
             continue;
         }
 
-        if(lastC != "" && isNotEndChar(lastC) && (lastC != " " || llC != " ") && (c == "\n" && nextC != "\n" || c == " " && nextC == "\n" && nnC == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
+        if(lastC != "" && isNotEndChar(lastC) && (lastC != " " || llC != " ") && (c == "\n" && nextC != "\n" && !isSpecialChar(nextC) || c == " " && nextC == "\n" && nnC != "\n" && !isSpecialChar(nnC)) && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
             if ((["터", "은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC)) convertData.push(" ");
             while(["\n", " "].includes(str.charAt(++i)));
             i--;
