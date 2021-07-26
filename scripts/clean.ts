@@ -4,6 +4,7 @@ function TextCleaner(str: string) {
     let textOpen = 0;
 
     // while((str.match(/\r\r/g) || []).length > 0) str = str.replace(/\r\r/g, "\r");
+    str = str.replace(/\r\n/g, "\n");
     str = str.replace(/\r/g, "\n");
 
     const quoteOrTextOpenCheck = (c: string) => {
@@ -38,6 +39,10 @@ function TextCleaner(str: string) {
         return ["!", ".", "?"].includes(c);
     };
 
+    const isNumber = (c: string) => {
+        return "0" <= c && c <= "9";
+    }
+
     const isQuoteChar = (c: string) => {
         return ["(", ")", "{", "}", "[", "]", "‘", "’", "“", "”", "\"", "'"].includes(c);
     }
@@ -63,8 +68,10 @@ function TextCleaner(str: string) {
         // if(nextC != "" && (isSpecialChar(c) || isKoChar(c) && !hasFirstKoChar(c)) && nextC != "\n" && !(isQuoteChar(nextC) || isSpecialChar(c) && isSpecialChar(nextC) || isKoChar(c) && !hasFirstKoChar(c) && isKoChar(c) && !hasFirstKoChar(nextC))) {
         if(nextC != "" && isSpecialChar(c) && nextC != "\n") {
             convertData.push(c);
-            if(!(textOpen > 0 || quoteStack.length > 0) && isSpecialEndChar(c) && c != "\n") convertData.push("\n");
-            else if(c != " " && nextC != " ") convertData.push(" ");
+            if(!(textOpen > 0 || quoteStack.length > 0) && isSpecialEndChar(c) && c != "\n" && c != " " && !isSpecialChar(nextC) && !isNumber(nextC) && nextC != " ") {
+                convertData.push("\n");
+            }
+            else if(c != " " && nextC != " " && !isSpecialChar(nextC) && !isQuoteChar(nextC)) convertData.push(" ");
             continue;
         }
 
