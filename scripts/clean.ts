@@ -65,20 +65,20 @@ function TextCleaner(str: string) {
             if(nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC) && lastC != " ") convertData.push(" ");
             continue;
         }
-        if((textOpen > 0 || quoteStack.length > 0) && c == " " && nextC != "" && ([")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] == nextC)) continue;
+        if((textOpen > 0 || quoteStack.length > 0) && c == " " && nextC != "" && ([")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && lastC == nextC)) continue;
 
         // if(nextC != "" && (isSpecialChar(c) || isKoChar(c) && !hasFirstKoChar(c)) && nextC != "\n" && !(isQuoteChar(nextC) || isSpecialChar(c) && isSpecialChar(nextC) || isKoChar(c) && !hasFirstKoChar(c) && isKoChar(c) && !hasFirstKoChar(nextC))) {
         if(nextC != "" && isSpecialChar(c) && nextC != "\n") {
             convertData.push(c);
-            if(!(textOpen > 0 || quoteStack.length > 0) && isSpecialEndChar(c) && c != "\n" && c != " " && !isSpecialChar(nextC) && !isNumber(nextC) && nextC != " ") {
+            if(textOpen <= 0 && quoteStack.length <= 0 && isSpecialEndChar(c) && !isQuoteChar(nextC) && c != "\n" && c != " " && !isSpecialChar(nextC) && !isNumber(nextC) && nextC != " ") {
                 convertData.push("\n");
             }
             else if(c != " " && nextC != " " && !isSpecialChar(nextC) && !isQuoteChar(nextC)) convertData.push(" ");
             continue;
         }
 
-        if(lastC != "" && isNotEndChar(lastC) && (lastC != " " && c == " " && nextC == "\n" && nnC != "\n" || (lastC != " " || llC != " ") && c == "\n" && nextC != "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
-            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC)) convertData.push(" ");
+        if(lastC != "" && isNotEndChar(lastC) && (lastC != " " || llC != " ") && (c == "\n" && nextC != "\n" || c == " " && nextC == "\n" && nnC == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
+            if ((["터", "은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC)) convertData.push(" ");
             while(["\n", " "].includes(str.charAt(++i)));
             i--;
             continue;
