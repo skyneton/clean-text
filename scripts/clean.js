@@ -1,8 +1,11 @@
+"use strict";
 function TextCleaner(str) {
-    var convertData = [];
-    var quoteStack = [];
-    var textOpen = 0;
-    var quoteOrTextOpenCheck = function (c) {
+    const convertData = [];
+    const quoteStack = [];
+    let textOpen = 0;
+    // while((str.match(/\r\r/g) || []).length > 0) str = str.replace(/\r\r/g, "\r");
+    str = str.replace(/\r/g, "\n");
+    const quoteOrTextOpenCheck = (c) => {
         if (["(", "{", "[", "‘", "“"].includes(c))
             textOpen++;
         else if ([")", "}", "]", "’", "”"].includes(c))
@@ -14,33 +17,35 @@ function TextCleaner(str) {
                 quoteStack.push(c);
         }
     };
-    var isKoChar = function (c) {
-        c = c.charCodeAt(0);
-        return 4352 <= c && c <= 4607 || 12592 <= c && c <= 12687 || 44032 <= c && c <= 55203;
+    const isKoChar = (c) => {
+        const code = c.charCodeAt(0);
+        return 4352 <= code && code <= 4607 || 12592 <= code && code <= 12687 || 44032 <= code && code <= 55203;
     };
-    var hasFirstKoChar = function (c) {
-        var firstCharId = Math.floor((c.charCodeAt(0) - 44032) / 588);
+    const isEnglishChar = (c) => {
+        c = c.toLowerCase();
+        return "a" <= c && c <= "z";
+    };
+    const hasFirstKoChar = (c) => {
+        const firstCharId = Math.floor((c.charCodeAt(0) - 44032) / 588);
         return firstCharId >= 0 && firstCharId <= 18;
     };
-    var isSpecialChar = function (c) {
+    const isSpecialChar = (c) => {
         return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|"].includes(c);
     };
-    var isSpecialEndChar = function (c) {
+    const isSpecialEndChar = (c) => {
         return ["!", ".", "?"].includes(c);
     };
-    var isQuoteChar = function (c) {
+    const isQuoteChar = (c) => {
         return ["(", ")", "{", "}", "[", "]", "‘", "’", "“", "”", "\"", "'"].includes(c);
     };
-    var isNotEndChar = function (c) {
-        return isKoChar(c) && hasFirstKoChar(c) || isSpecialChar(c) && c == ",";
+    const isNotEndChar = (c) => {
+        return isKoChar(c) && hasFirstKoChar(c) || isEnglishChar(c) || isSpecialChar(c) && !isQuoteChar(c) && c == ",";
     };
-    for (var i = 0; i < str.length; i++) {
-        var c = str.charAt(i);
-        var nextC = str.charAt(i + 1);
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charAt(i);
+        const nextC = str.charAt(i + 1);
         quoteOrTextOpenCheck(c);
-        if (c == "\r")
-            continue;
-        if (c == " " && ["\n", "\r"].includes(nextC))
+        if (c == " " && nextC == "\n")
             continue;
         if ((textOpen > 0 || quoteStack.length > 0) && c == "\n") {
             if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC))
@@ -49,7 +54,8 @@ function TextCleaner(str) {
         }
         if ((textOpen > 0 || quoteStack.length > 0) && c == " " && nextC != "" && ([")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] == nextC))
             continue;
-        if (nextC != "" && (isSpecialChar(c) || isKoChar(c) && !hasFirstKoChar(c)) && !["\n", "\r"].includes(nextC) && !(isQuoteChar(nextC) || isSpecialChar(c) && isSpecialChar(nextC) || isKoChar(c) && !hasFirstKoChar(c) && isKoChar(c) && !hasFirstKoChar(nextC))) {
+        // if(nextC != "" && (isSpecialChar(c) || isKoChar(c) && !hasFirstKoChar(c)) && nextC != "\n" && !(isQuoteChar(nextC) || isSpecialChar(c) && isSpecialChar(nextC) || isKoChar(c) && !hasFirstKoChar(c) && isKoChar(c) && !hasFirstKoChar(nextC))) {
+        if (nextC != "" && isSpecialChar(c) && nextC != "\n") {
             convertData.push(c);
             if (!(textOpen > 0 || quoteStack.length > 0) && isSpecialEndChar(c) && c != "\n")
                 convertData.push("\n");
@@ -57,26 +63,20 @@ function TextCleaner(str) {
                 convertData.push(" ");
             continue;
         }
-        var lastC = convertData[convertData.length - 1];
-        // console.log(lastC, typeof lastC === "string" && lastC != "" && isKoChar(lastC) && hasFirstKoChar(lastC), ["\n", " "].includes(c));
-        if ((typeof lastC === "string" && lastC != "" && isNotEndChar(lastC) && ["\n", " "].includes(c) || isNotEndChar(c)) && nextC != "" && ["\n", "\r"].includes(nextC)) {
-            if (c != "\n")
-                convertData.push(c);
-            if (["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로"].includes(c))
+        const lastC = convertData[convertData.length - 1];
+        if (typeof lastC === "string" && lastC != "" && isNotEndChar(lastC) && (c == " " && nextC == "\n" || c == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
+            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
                 convertData.push(" ");
-            while (["\n", "\r"].includes(str.charAt(++i)))
+            while (["\n", " "].includes(str.charAt(++i)))
                 ;
             i--;
             continue;
         }
         convertData.push(c);
     }
-    return new /** @class */ (function () {
-        function class_1() {
-        }
-        class_1.prototype.toBlob = function () {
+    return new class {
+        toBlob() {
             return new Blob(convertData, { type: "text/plain" });
-        };
-        return class_1;
-    }());
+        }
+    };
 }
