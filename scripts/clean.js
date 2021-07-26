@@ -46,9 +46,11 @@ function TextCleaner(str) {
         return isKoChar(c) && hasFirstKoChar(c) || isEnglishChar(c) || isSpecialChar(c) && !isQuoteChar(c) && c == ",";
     };
     for (let i = 0; i < str.length; i++) {
+        const llC = convertData[convertData.length - 2] || "";
+        const lastC = convertData[convertData.length - 1] || "";
         const c = str.charAt(i);
         const nextC = str.charAt(i + 1);
-        const lastC = convertData[convertData.length - 1] || "";
+        const nnC = str.charAt(i + 2);
         quoteOrTextOpenCheck(c);
         if (c == " " && nextC == "\n")
             continue;
@@ -69,8 +71,8 @@ function TextCleaner(str) {
                 convertData.push(" ");
             continue;
         }
-        if (lastC != "" && isNotEndChar(lastC) && (c == " " && nextC == "\n" || c == "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
-            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
+        if (lastC != "" && isNotEndChar(lastC) && (lastC != " " && c == " " && nextC == "\n" && nnC != "\n" || (lastC != " " || llC != " ") && c == "\n" && nextC != "\n") && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
+            if ((["은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
                 convertData.push(" ");
             while (["\n", " "].includes(str.charAt(++i)))
                 ;
