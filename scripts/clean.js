@@ -79,6 +79,13 @@ function TextCleaner(str) {
             i--;
             continue;
         }
+        if (isSpecialChar(nextC)) {
+            if (c == "따")
+                convertData.push("다");
+            else
+                convertData.push(c);
+            continue;
+        }
         convertData.push(c);
     }
     return new class {
