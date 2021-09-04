@@ -84,7 +84,7 @@ function TextCleaner(str: string) {
         }
 
         if(lastC != "" && isNotEndChar(lastC) && (lastC != " " || llC != " ") && (c == "\n" && nextC != "\n" && !isSpecialChar(nextC) || c == " " && nextC == "\n" && nnC != "\n" && !isSpecialChar(nnC)) && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
-            if ((["터", "은", "는", "이", "가", "을", "를", "고", "기", "아", "의", "에", "만", "지", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC)) convertData.push(" ");
+            if ((["은", "는", "이", "가", "을", "를", "고", "의", "에", "만", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC)) convertData.push(" ");
             while(["\n", " "].includes(str.charAt(++i)));
             i--;
             continue;
