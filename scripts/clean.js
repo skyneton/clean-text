@@ -54,6 +54,11 @@ function TextCleaner(str) {
         quoteOrTextOpenCheck(c);
         if (c == " " && nextC == "\n")
             continue;
+        if (textOpen <= 0 && quoteStack.length <= 0 && !isQuoteChar(lastC) && isQuoteChar(c) && c == nextC) {
+            convertData.push(c);
+            convertData.push("\n");
+            continue;
+        }
         if ((textOpen > 0 || quoteStack.length > 0) && c == "\n") {
             if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC) && lastC != " ")
                 convertData.push(" ");
@@ -67,7 +72,7 @@ function TextCleaner(str) {
             if (textOpen <= 0 && quoteStack.length <= 0 && isSpecialEndChar(c) && !isQuoteChar(nextC) && c != "\n" && c != " " && !isSpecialChar(nextC) && !isNumber(nextC) && nextC != " ") {
                 convertData.push("\n");
             }
-            else if (c != " " && nextC != " " && !isSpecialChar(nextC) && !isQuoteChar(nextC))
+            else if (c != " " && nextC != " " && !isQuoteChar(c) && !isSpecialChar(nextC) && !isQuoteChar(nextC))
                 convertData.push(" ");
             continue;
         }
