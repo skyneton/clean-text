@@ -45,6 +45,9 @@ function TextCleaner(str) {
     const isNotEndChar = (c) => {
         return isKoChar(c) && hasFirstKoChar(c) || isEnglishChar(c) || isSpecialChar(c) && !isQuoteChar(c) && c == ",";
     };
+    const koSpaceChar = (c) => {
+        return ["은", "는", "이", "가", "을", "를", "고", "의", "에", "만", "로", "과", "던", "서", "해", "럼", "면", "도"].includes(c);
+    };
     for (let i = 0; i < str.length; i++) {
         const llC = convertData[convertData.length - 2] || "";
         const lastC = convertData[convertData.length - 1] || "";
@@ -54,13 +57,15 @@ function TextCleaner(str) {
         quoteOrTextOpenCheck(c);
         if (c == " " && nextC == "\n")
             continue;
+        //"인용구""인용구" 변환
         if (textOpen <= 0 && quoteStack.length <= 0 && !isQuoteChar(lastC) && isQuoteChar(c) && c == nextC) {
             convertData.push(c);
             convertData.push("\n");
             continue;
         }
+        //인용구 안의 엔터 변환
         if ((textOpen > 0 || quoteStack.length > 0) && c == "\n") {
-            if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC) && lastC != " ")
+            if (nextC != "" && (![")", "}", "]", "’", "”", " "].includes(nextC) || ["\"", "'"].includes(nextC) && quoteStack[quoteStack.length - 1] != nextC) && lastC != " " && isKoChar(lastC) && koSpaceChar(lastC))
                 convertData.push(" ");
             continue;
         }
@@ -77,12 +82,20 @@ function TextCleaner(str) {
             continue;
         }
         if (lastC != "" && isNotEndChar(lastC) && (lastC != " " || llC != " ") && (c == "\n" && nextC != "\n" && !isSpecialChar(nextC) || c == " " && nextC == "\n" && nnC != "\n" && !isSpecialChar(nnC)) && !(isKoChar(lastC) && isEnglishChar(nextC) || isEnglishChar(lastC) && isKoChar(nextC)) && (!isKoChar(lastC) || hasFirstKoChar(lastC))) {
-            if ((["은", "는", "이", "가", "을", "를", "고", "의", "에", "만", "로", "과", "던", "서", "해", "럼", "면"].includes(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
+            if ((koSpaceChar(lastC) || isEnglishChar(lastC)) && !isQuoteChar(nextC))
                 convertData.push(" ");
             while (["\n", " "].includes(str.charAt(++i)))
                 ;
             i--;
             continue;
+        }
+        if (lastC == "겟" && (c == "다" || c == "따" || isSpecialChar(nextC))) {
+            convertData.pop();
+            convertData.push("겠");
+        }
+        if (lastC == "었" && c == "군") {
+            convertData.pop();
+            convertData.push("였");
         }
         if (isSpecialChar(nextC)) {
             if (c == "따")
