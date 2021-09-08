@@ -87,28 +87,24 @@ const fileEncode = file => {
     encoding.start(file, {
         "type": type,
         success(result, before) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                url = URL.createObjectURL(TextCleaner(reader.result).toBlob());
-                
-                box.setAttribute("finished", true);
-                const temp = [...downloadBtn.children];
-                for(let i = 0; i < temp.length; i++) {
-                    temp[i].remove();
-                }
-                if(type !== before) {
-                    typeInfo.innerText = before;
-                    typeInfo.setAttribute("title", (() => {
-                        switch(document.title) {
-                            case "텍스트 정리 - 텍스트 형식 정리": return "감지됨";
-                            case "テキストせいり - テキストけいしき整理せいり": return "かんち";
-                            default: return "Detected";
-                        }
-                    })());
-                }
-                downloadBtn.appendChild(downloadSvg());
+            url = URL.createObjectURL(TextCleaner(result).toBlob());
+            
+            box.setAttribute("finished", true);
+            const temp = [...downloadBtn.children];
+            for(let i = 0; i < temp.length; i++) {
+                temp[i].remove();
             }
-            reader.readAsText(result, "UTF-8");
+            if(type !== before) {
+                typeInfo.innerText = before;
+                typeInfo.setAttribute("title", (() => {
+                    switch(document.title) {
+                        case "텍스트 정리 - 텍스트 형식 정리": return "감지됨";
+                        case "テキストせいり - テキストけいしき整理せいり": return "かんち";
+                        default: return "Detected";
+                    }
+                })());
+            }
+            downloadBtn.appendChild(downloadSvg());
         }
     });
 
