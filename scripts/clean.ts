@@ -7,9 +7,10 @@ function TextCleaner(str: string) {
     str = str.replace(/\r\n/g, "\n");
     str = str.replace(/\r/g, "\n");
 
-    const quoteOrTextOpenCheck = (c: string) => {
+    const quoteOrTextOpenCheck = (c: string, nextC: string) => {
         if(["(", "{", "[", "‘", "“"].includes(c)) textOpen++;
         else if([")", "}", "]", "’", "”"].includes(c)) textOpen--;
+        if(c == "'" && ["s", "t", "d", "l", "m", "v", "r"].includes(nextC)) return; //영어 단어 축약 제외
         else if(["\"", "'"].includes(c)) {
             if(quoteStack[quoteStack.length - 1] == c) quoteStack.pop();
             else quoteStack.push(c);
@@ -32,7 +33,7 @@ function TextCleaner(str: string) {
     }
 
     const isSpecialChar = (c: string) => {
-        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|", "+", "=", "-", "_"].includes(c) || isQuoteChar(c);
+        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|", "+", "=", "-", "_", "⋯", "…"].includes(c) || isQuoteChar(c);
     };
 
     const isSpecialEndChar = (c: string) => {
@@ -61,7 +62,7 @@ function TextCleaner(str: string) {
         const c = str.charAt(i);
         const nextC = str.charAt(i+1);
         const nnC = str.charAt(i+2);
-        quoteOrTextOpenCheck(c);
+        quoteOrTextOpenCheck(c, nextC);
 
         if(c == " " && nextC == "\n") continue;
 

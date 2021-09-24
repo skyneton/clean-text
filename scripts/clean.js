@@ -6,11 +6,13 @@ function TextCleaner(str) {
     // while((str.match(/\r\r/g) || []).length > 0) str = str.replace(/\r\r/g, "\r");
     str = str.replace(/\r\n/g, "\n");
     str = str.replace(/\r/g, "\n");
-    const quoteOrTextOpenCheck = (c) => {
+    const quoteOrTextOpenCheck = (c, nextC) => {
         if (["(", "{", "[", "‘", "“"].includes(c))
             textOpen++;
         else if ([")", "}", "]", "’", "”"].includes(c))
             textOpen--;
+        if (c == "'" && ["s", "t", "d", "l", "m", "v", "r"].includes(nextC))
+            return; //영어 단어 축약 제외
         else if (["\"", "'"].includes(c)) {
             if (quoteStack[quoteStack.length - 1] == c)
                 quoteStack.pop();
@@ -31,7 +33,7 @@ function TextCleaner(str) {
         return firstCharId >= 0 && firstCharId <= 18;
     };
     const isSpecialChar = (c) => {
-        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|", "+", "=", "-", "_"].includes(c) || isQuoteChar(c);
+        return ["!", "$", "%", "^", "&", "*", ":", ".", ",", "?", "/", "|", "+", "=", "-", "_", "⋯", "…"].includes(c) || isQuoteChar(c);
     };
     const isSpecialEndChar = (c) => {
         return ["!", ".", "?"].includes(c);
@@ -54,7 +56,7 @@ function TextCleaner(str) {
         const c = str.charAt(i);
         const nextC = str.charAt(i + 1);
         const nnC = str.charAt(i + 2);
-        quoteOrTextOpenCheck(c);
+        quoteOrTextOpenCheck(c, nextC);
         if (c == " " && nextC == "\n")
             continue;
         //"인용구""인용구" 변환
@@ -93,9 +95,13 @@ function TextCleaner(str) {
             convertData.pop();
             convertData.push("겠");
         }
-        if (lastC == "었" && c == "군") {
+        else if (lastC == "었" && c == "군") {
             convertData.pop();
             convertData.push("였");
+        }
+        else if (lastC == "졋" && (c == "다" || c == "따" || isSpecialChar(nextC))) {
+            convertData.pop();
+            convertData.push("졌");
         }
         if (isSpecialChar(nextC)) {
             if (c == "따")
