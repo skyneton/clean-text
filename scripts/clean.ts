@@ -86,7 +86,7 @@ function TextCleaner(str: string) {
             if(textOpen <= 0 && quoteStack.length <= 0 && isSpecialEndChar(c) && !isQuoteChar(nextC) && c != "\n" && c != " " && !isSpecialChar(nextC) && !isNumber(nextC) && nextC != " ") {
                 convertData.push("\n");
             }
-            else if(c != " " && nextC != " " && !isQuoteChar(c) && !isSpecialChar(nextC) && !isQuoteChar(nextC)) convertData.push(" ");
+            else if(c != " " && nextC != " " && isSpecialEndChar(c) && !isSpecialChar(nextC) && !isQuoteChar(nextC)) convertData.push(" ");
             continue;
         }
 
